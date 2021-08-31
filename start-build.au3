@@ -30,6 +30,11 @@ FileClose($hFileOpen_sdk_path2)
 $sdk_1 = _FileListToArrayRec(@LocalAppDataDir, "Sdk", 2, 1, Default, 2)
 $sdk_2 = _FileListToArrayRec(@AppDataCommonDir, "Sdk", 2, 1, Default, 2)
 $sdk_3 = _FileListToArrayRec(@AppDataDir, "Sdk", 2, 1, Default, 2)
+
+;_ArrayDisplay($sdk_1, "1")
+;_ArrayDisplay($sdk_2, "2")
+;_ArrayDisplay($sdk_3, "3")
+
 ;$foo = _FileListToArray3("E:\", "Sdk", 0, 1)
 ;$foo = _FileListToArrayFolders1("E:\", "res", "res", 1)
 ;_ArrayDisplay($foo, "")
@@ -77,7 +82,6 @@ $sdk_6_exists = StringInStr($sdk_6_result, "Sdk\")
 ;MsgBox(0, "", StringSplit($sdk_6_result, ";")[2])
 Local $sdk_path
 
-
 Local $hFileOpen_sdk_path = FileOpen("sdk-path.conf", $FO_READ)
 If $hFileOpen_sdk_path = -1 Then
    MsgBox(0+64, "SDK Detection", "An error occurred when reading Sdk path save file."&@CRLF&@CRLF&"Empty save file created and later will be used.")
@@ -88,7 +92,7 @@ Local $sFileRead_sdk_path = FileRead($hFileOpen_sdk_path)
 FileClose($hFileOpen_sdk_path)
 
 
-If ($sdk_1_exists  Or $sdk_2_exists Or $sdk_3_exists Or $sFileRead_sdk_path) = 0 Then
+If ($sdk_1_exists  Or $sdk_2_exists Or $sdk_3_exists) = 0 Or ($sFileRead_sdk_path = '') Then
    $sdk_notfound = MsgBox(4+32, "SDK Detection", "SDK not found on default paths. Do you want to tpye the Sdk path manually?")
    If $sdk_notfound = 6 Then
 	  $sdk_path = InputBox("Sdk path", "Please type the full Sdk path (with backslash '\'): "&@CRLF&@CRLF&"eg.: E:\Sdk\ <--(always put a \ at the end)", "", "", 300)
@@ -123,6 +127,8 @@ Else
 	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_4_result, ";")[2]&"' and applied")
    Else
    #comments-end
+
+
    If Not $sdk_3_exists = 0 And $sdk_3_result = -1 And (DirGetSize(StringSplit($sdk_3_result, ";")[2]) > 250000000) Then
 	  $sdk_path = StringSplit($sdk_3_result, ";")[2]
 	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_3_result, ";")[2]&"' and applied")
