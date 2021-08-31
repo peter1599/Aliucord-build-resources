@@ -4,6 +4,7 @@
 #include <File.au3>
 #include <MsgBoxConstants.au3>
 #include <Constants.au3>
+#include <AutoItConstants.au3>
 ;#include <FileListToArray3.au3>
 
 ;#RequireAdmin
@@ -14,6 +15,133 @@ $res = _FileListToArrayRec(@ScriptDir, "res", 2, 1)
 ;$index = _ArraySearch($res, "src\main\res")
 $res_result = _ArrayToString($res, ";")
 $res_exists = StringInStr($res_result, "src\main\res")
+
+;-----------------------SDK Detection--------------------------------
+Local $hFileOpen_sdk_path2 = FileOpen("sdk-path.conf", $FO_READ)
+If $hFileOpen_sdk_path2 = -1 Then
+   MsgBox(0+64, "SDK Detection", "Searching for Android SDK on default paths..."&@CRLF&@CRLF&"(Don't touch anything! This message will disappear automatically!)", 6)
+   ;MsgBox(0+64, "", "An error occurred when reading Sdk path save file."&@CRLF&@CRLF&"Empty save file created and later will be used.")
+   ;$init2 = FileWrite("sdk-path.conf", "")
+   ;FileClose($init2)
+EndIf
+Local $sFileRead_sdk_path2 = FileRead($hFileOpen_sdk_path2)
+FileClose($hFileOpen_sdk_path2)
+
+$sdk_1 = _FileListToArrayRec(@LocalAppDataDir, "Sdk", 2, 1, Default, 2)
+$sdk_2 = _FileListToArrayRec(@AppDataCommonDir, "Sdk", 2, 1, Default, 2)
+$sdk_3 = _FileListToArrayRec(@AppDataDir, "Sdk", 2, 1, Default, 2)
+;$foo = _FileListToArray3("E:\", "Sdk", 0, 1)
+;$foo = _FileListToArrayFolders1("E:\", "res", "res", 1)
+;_ArrayDisplay($foo, "")
+
+#comments-start
+Local $sdk_4
+Local $sdk_5
+Local $sdk_6
+
+If DriveStatus("C:\") = "READY" And DirGetSize("C:\") > 0 Then
+   $sdk_4 = _FileListToArrayRec("C:\", "Sdk", 2, 1, Default, 2)
+Endif
+If DriveStatus("D:\") = "READY" And DirGetSize("D:\") > 0 Then
+   $sdk_5 = _FileListToArrayRec("D:\", "Sdk", 2, 1, Default, 2)
+Endif
+If DriveStatus("E:\") = "READY" And DirGetSize("E:\") > 0 Then
+   $sdk_6 = _FileListToArrayRec("E:\", "Sdk", 2, 1, Default, 2)
+Endif
+#comments-end
+
+$sdk_1_result = _ArrayToString($sdk_1, ";")
+$sdk_2_result = _ArrayToString($sdk_2, ";")
+$sdk_3_result = _ArrayToString($sdk_3, ";")
+
+#comments-start
+$sdk_4_result = _ArrayToString($sdk_4, ";")
+$sdk_5_result = _ArrayToString($sdk_5, ";")
+$sdk_6_result = _ArrayToString($sdk_6, ";")
+#comments-end
+
+$sdk_1_exists = StringInStr($sdk_1_result, "Sdk\")
+$sdk_2_exists = StringInStr($sdk_2_result, "Sdk\")
+$sdk_3_exists = StringInStr($sdk_3_result, "Sdk\")
+
+#comments-start
+$sdk_4_exists = StringInStr($sdk_4_result, "Sdk\")
+$sdk_5_exists = StringInStr($sdk_5_result, "Sdk\")
+$sdk_6_exists = StringInStr($sdk_6_result, "Sdk\")
+#comments-end
+
+
+;_ArrayDisplay($sdk_6, "")
+;MsgBox(0, "2", $sdk_6_result)
+
+;MsgBox(0, "", StringSplit($sdk_6_result, ";")[2])
+Local $sdk_path
+
+
+Local $hFileOpen_sdk_path = FileOpen("sdk-path.conf", $FO_READ)
+If $hFileOpen_sdk_path = -1 Then
+   MsgBox(0+64, "SDK Detection", "An error occurred when reading Sdk path save file."&@CRLF&@CRLF&"Empty save file created and later will be used.")
+   $init = FileWrite("sdk-path.conf", "")
+   FileClose($init)
+EndIf
+Local $sFileRead_sdk_path = FileRead($hFileOpen_sdk_path)
+FileClose($hFileOpen_sdk_path)
+
+
+If ($sdk_1_exists  Or $sdk_2_exists Or $sdk_3_exists Or $sFileRead_sdk_path) = 0 Then
+   $sdk_notfound = MsgBox(4+32, "SDK Detection", "SDK not found on default paths. Do you want to tpye the Sdk path manually?")
+   If $sdk_notfound = 6 Then
+	  $sdk_path = InputBox("Sdk path", "Please type the full Sdk path (with backslash '\'): "&@CRLF&@CRLF&"eg.: E:\Sdk\ <--(always put a \ at the end)", "", "", 300)
+	  If @error = 1 Then
+		 Exit
+	  Else
+		 If Not FileWrite("sdk-path.conf", "") Then
+			MsgBox($MB_SYSTEMMODAL, "", "An error occurred whilst writing the Sdk path save file.")
+			Return False
+		 EndIf
+		 Local $hFileOpen = FileOpen("sdk-path.conf", $FO_OVERWRITE)
+		 If $hFileOpen = -1 Then
+			MsgBox($MB_SYSTEMMODAL, "", "An error occurred whilst writing the Sdk path save file.")
+			Return False
+		 EndIf
+		 FileWrite("sdk-path.conf", $sdk_path)
+		 FileClose($hFileOpen)
+	  EndIf
+   ElseIf $sdk_notfound = 7 Then
+	  Exit
+   EndIf
+Else
+   #comments-start
+   If Not $sdk_6_result = 0 or Not $sdk_6_result = -1 And DirGetSize(StringSplit($sdk_6_result, ";")[2]) > 250000000 Then
+	  $sdk_path = StringSplit($sdk_6_result, ";")[2]
+	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_6_result, ";")[2]&"' and applied")
+   ElseIf Not $sdk_5_result = 0 or (Not $sdk_5_result = -1 And DirGetSize(StringSplit($sdk_5_result, ";")[2]) > 250000000 Then
+	  $sdk_path = StringSplit($sdk_5_result, ";")[2]
+	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_5_result, ";")[2]&"' and applied")
+   ElseIf Not $sdk_4_result = 0 or Not $sdk_4_result = -1 And DirGetSize(StringSplit($sdk_4_result, ";")[2]) > 250000000 Then
+	  $sdk_path = StringSplit($sdk_4_result, ";")[2]
+	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_4_result, ";")[2]&"' and applied")
+   Else
+   #comments-end
+   If Not $sdk_3_exists = 0 And $sdk_3_result = -1 And (DirGetSize(StringSplit($sdk_3_result, ";")[2]) > 250000000) Then
+	  $sdk_path = StringSplit($sdk_3_result, ";")[2]
+	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_3_result, ";")[2]&"' and applied")
+   ElseIf Not $sdk_2_exists = 0 And $sdk_2_result = -1 And (DirGetSize(StringSplit($sdk_2_result, ";")[2]) > 250000000) Then
+	  $sdk_path = StringSplit($sdk_2_result, ";")[2]
+	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_2_result, ";")[2]&"' and applied")
+   ElseIf Not $sdk_1_exists = 0 And $sdk_1_result = -1 And (DirGetSize(StringSplit($sdk_1_result, ";")[2]) > 250000000) Then
+	  $sdk_path = StringSplit($sdk_1_result, ";")[2]
+	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_1_result, ";")[2]&"' and applied")
+   ElseIf $sFileRead_sdk_path Then
+	  $sdk_path = $sFileRead_sdk_path
+	  MsgBox(0+64, "SDK Detection", "No SDK was found on default paths. "&@CRLF&@CRLF&"SDK save file found with: '"&$sdk_path&"' and applied")
+   EndIf
+EndIf
+
+;MsgBox(0, "", $sdk_1_result)
+;_ArrayDisplay($sdk_1, "")
+
+;-------------------------------------------------------------------
 
 If $res_exists = 0 Then
    MsgBox(0+64, "", "Info: No resources found")
@@ -49,7 +177,7 @@ If $res_found = 6 Then
 	  EndIf
    WEnd
    Sleep(500)
-   $aapt2_link = "aapt2 link -I D:\Sdk\platforms\android-30\android.jar -R tmpres.zip --manifest BetterStatus/src/main/AndroidManifest.xml -o plugin-tmp.apk"
+   $aapt2_link = "aapt2 link -I "&$sdk_path&"platforms\android-30\android.jar -R tmpres.zip --manifest "&$plugin_name&"/src/main/AndroidManifest.xml -o plugin-tmp.apk"
    RunWait('"' & @ComSpec & '" /c' & $aapt2_link)  ;/c is hidden     ;/k is not hidden
    Sleep(100)
    $res_check = FileFindFirstFile("*.apk")
@@ -106,11 +234,11 @@ If $res_found = 6 Then
 		 ;MsgBox(0, "STDOUT read:", $f_plugin_validation_line)
 		 ;MsgBox(0, "", $ourTest)
 		 If Not StringInStr($f_plugin_validation_line, "ac-plugin") Or Not StringInStr($f_plugin_validation_line, ".dex") Then
-			MsgBox(0+16, "Plugin validation", "This plugin is missing some files. Please check and build again.")
+			MsgBox(0+16, "Plugin validation", "The final merged plugin is missing some files. Please check and build again.")
 			ExitLoop
 			Exit
 		 Else
-			MsgBox(0+64, "Plugin validation", "This plugin is valid.")
+			MsgBox(0+64, "Plugin validation", "The final merged plugin is valid.")
 			ExitLoop
 		 EndIf
 		 Sleep(50)
@@ -130,30 +258,3 @@ Else
 	  Exit
    EndIf
 EndIf
-
-;Some funcs
-
-Func _StdoutExpect($hOurProcess, $sOurExpected, $iOurTimeout = 100, $sOurSeparator = "|")
-    Local $iOurTimer, $sOurOutput, $asOurExpected
-    ; Explode the expected substrings into a StringSplit array
-    $asOurExpected = StringSplit($sOurExpected, $sOurSeparator)
-    ; Record the time to test vs our tiumeout.
-    $iOurTimer = TimerInit()
-    ; Loop
-    While 1
-        ; Return empty-handed of the timeout has elapsed
-        If TimerDiff($iOurTimer) > $iOurTimeout Then
-            SetError(1)
-            Return 0
-        EndIf
-        ; Read and save available output from STDOUT
-        $sOurOutput &= StdoutRead($hOurProcess)
-        ; Step through provided substrings and test vs output
-        For $incr = 1 To $asOurExpected[0]
-            If StringInStr($sOurOutput, $asOurExpected[$incr]) Then
-                ; Found this substring, so return its index
-                Return $incr
-            EndIf
-        Next
-    WEnd
-EndFunc
