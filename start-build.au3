@@ -92,7 +92,7 @@ Local $sFileRead_sdk_path = FileRead($hFileOpen_sdk_path)
 FileClose($hFileOpen_sdk_path)
 
 
-If ($sdk_1_exists  Or $sdk_2_exists Or $sdk_3_exists) = 0 Or ($sFileRead_sdk_path = '') Then
+If ($sdk_1_exists  Or $sdk_2_exists Or $sdk_3_exists) = 0 And ($sFileRead_sdk_path = "") Then
    $sdk_notfound = MsgBox(4+32, "SDK Detection", "SDK not found on default paths. Do you want to tpye the Sdk path manually?")
    If $sdk_notfound = 6 Then
 	  $sdk_path = InputBox("Sdk path", "Please type the full Sdk path (with backslash '\'): "&@CRLF&@CRLF&"eg.: E:\Sdk\ <--(always put a \ at the end)", "", "", 300)
@@ -138,7 +138,7 @@ Else
    ElseIf Not $sdk_1_exists = 0 And $sdk_1_result = -1 And (DirGetSize(StringSplit($sdk_1_result, ";")[2]) > 250000000) Then
 	  $sdk_path = StringSplit($sdk_1_result, ";")[2]
 	  MsgBox(0+64, "SDK Detection", "SDK found on: '"&StringSplit($sdk_1_result, ";")[2]&"' and applied")
-   ElseIf $sFileRead_sdk_path Then
+   ElseIf Not $sFileRead_sdk_path = '' Then
 	  $sdk_path = $sFileRead_sdk_path
 	  MsgBox(0+64, "SDK Detection", "No SDK was found on default paths. "&@CRLF&@CRLF&"SDK save file found with: '"&$sdk_path&"' and applied")
    EndIf
